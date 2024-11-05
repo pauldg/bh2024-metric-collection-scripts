@@ -73,8 +73,11 @@ def load_app_configuration(app_conf_path=None, local_conf=None, config_dir=PULSA
 def main():
 
     conf = load_app_configuration(app_conf_path="/opt/pulsar/config/app.yml")
-    print(conf)
-
+    print(conf['message_queue_url'])
+    connection = kombu.Connection(conf['message_queue_url'])
+    connection.connect()
+    print("Connected: ", connection.connected)
+    connection.release()
     subprocess.run(["sh","./cluster_util-condor.sh"]) 
 
 if __name__ == '__main__':
