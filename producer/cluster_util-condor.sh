@@ -6,7 +6,7 @@ total_detected_cpus=$(condor_status -af DetectedCpus -constraint 'SlotType == "P
 
 # Claimed CPUs
 claimed_cpus=$(condor_status -af Cpus -constraint 'State == "Claimed"' | paste -s -d'+' | bc)
-
+ 
 # Unclaimed CPUs
 unclaimed_cpus=$(condor_status -af Cpus -constraint 'State == "Unclaimed"' | paste -s -d'+' | bc)
 

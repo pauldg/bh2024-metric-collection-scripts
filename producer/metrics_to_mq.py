@@ -3,6 +3,7 @@ import os
 import subprocess
 import configparser
 import kombu
+import json
 
 try:
     import yaml
@@ -74,20 +75,26 @@ def load_app_configuration(app_conf_path=None, local_conf=None, config_dir=PULSA
 
 def main():
 
-    conf = load_app_configuration(app_conf_path="/opt/pulsar/config/app.yml")
+    conf = load_app_configuration(app_conf_path="/opt/pulsar/config_be01/app.yml")
     print(conf['message_queue_url'])
     connection = kombu.Connection(conf['message_queue_url'])
     connection.connect()
+    channel = connection.channel()
     print("Connected: ", connection.connected)
-    producer = connection.Producer()
-    exchange = kombu.Exchange('name', type='direct')
+    exchange = kombu.Exchange('condor-status', type='direct')
+    producer = connection.Producer(exchange=exchange, channel=channel, routing_key='rk')
+    queue = kombu.Queue(name='condor-status-queue', exchange=exchange, routing_key='rk')
+    queue.maybe_bind(connection)
+    queue.declare()
     condor_metrics = subprocess.check_output(["sh","./cluster_util-condor.sh"]).decode("utf-8").strip()
     print("condor metrics:", condor_metrics)
+    print(type(condor_metrics))
     producer.publish(
-     {'condor_metrics': condor_metrics},  # message to send
+     {"condor_metrics": condor_metrics},  # message to send
      exchange=exchange,   # destination exchange
      routing_key='rk',    # destination routing key,
-     declare=[exchange],  # make sure exchange is declared,
+     declare=[queue],  # make sure exchange is declared,
+     serializer="json"
     )
     connection.release()
 
