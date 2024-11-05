@@ -2,6 +2,7 @@ import sys
 import os
 import subprocess
 import configparser
+import kombu
 
 try:
     import yaml
@@ -13,6 +14,7 @@ try:
     import kombu.exceptions
     from kombu import pools
 except ImportError:
+    print("import error")
     kombu = None
 
 DEFAULT_APP_YAML = "app.yml"
@@ -77,8 +79,17 @@ def main():
     connection = kombu.Connection(conf['message_queue_url'])
     connection.connect()
     print("Connected: ", connection.connected)
+    producer = connection.Producer()
+    exchange = kombu.Exchange('name', type='direct')
+    condor_metrics = subprocess.check_output(["sh","./cluster_util-condor.sh"]).decode("utf-8").strip()
+    print("condor metrics:", condor_metrics)
+    producer.publish(
+     {'condor_metrics': condor_metrics},  # message to send
+     exchange=exchange,   # destination exchange
+     routing_key='rk',    # destination routing key,
+     declare=[exchange],  # make sure exchange is declared,
+    )
     connection.release()
-    subprocess.run(["sh","./cluster_util-condor.sh"]) 
 
 if __name__ == '__main__':
     main()
