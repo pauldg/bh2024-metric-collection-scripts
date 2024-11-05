@@ -16,6 +16,7 @@ except ImportError:
     kombu = None
 
 DEFAULT_APP_YAML = "app.yml"
+CONFIG_PREFIX = "PULSAR_CONFIG_"
 PULSAR_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if "PULSAR_CONFIG_DIR" in os.environ:
     PULSAR_CONFIG_DIR = os.path.abspath(os.environ["PULSAR_CONFIG_DIR"])
@@ -70,6 +71,9 @@ def load_app_configuration(app_conf_path=None, local_conf=None, config_dir=PULSA
 
 
 def main():
+
+    conf = load_app_configuration(app_conf_path="/opt/pulsar/config/app.yml")
+    print(conf)
 
     subprocess.run(["sh","./cluster_util-condor.sh"]) 
 
