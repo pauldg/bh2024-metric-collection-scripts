@@ -2,6 +2,7 @@
 import argparse
 import datetime
 import sys
+import time
 import os
 import subprocess
 import yaml
@@ -54,8 +55,8 @@ def get_condor_status(cluster_status_script_file: str) -> str:
     condor_metrics = subprocess.check_output(["sh", cluster_status_script_file]).decode("utf-8").strip()
 
     # Add timestamp
-    now = datetime.datetime.utcnow()
-    condor_metrics = f"{condor_metrics},utc_querytime={now}"
+    now = time.time()
+    condor_metrics = f"{condor_metrics},querytime={now}"
     print(condor_metrics)
     return condor_metrics
 
