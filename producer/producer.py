@@ -1,4 +1,5 @@
 """This script is a producer that publishes condor status details to the queue"""
+import argparse
 import datetime
 import sys
 import os
