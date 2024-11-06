@@ -57,7 +57,6 @@ def get_condor_status(cluster_status_script_file: str) -> str:
     # Add timestamp
     now = time.time()
     condor_metrics = f"{condor_metrics},querytime={now}"
-    print(condor_metrics)
     return condor_metrics
 
 
@@ -76,6 +75,10 @@ def produce_message(amqp_url: str, condor_metrics: str) -> None:
         queue = Queue(name=f"{vhost}-condor-stats", exchange=exchange, routing_key=routing_key)
         queue.maybe_bind(connection)
         queue.declare()
+
+        # Add destination to metrics
+        condor_metrics = f"{condor_metrics},destinationd_id={vhost}"
+
         producer.publish(
             {"condor_metrics": condor_metrics},  
             exchange=exchange,   
