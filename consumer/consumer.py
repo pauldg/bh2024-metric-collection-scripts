@@ -1,12 +1,13 @@
 """This script is a consumer that listens to the queue and processes the messages and pushes them to the InfluxDB database."""
 
+import argparse
 import os
 import sys
-import argparse
 import time
-from multiprocessing import Process, Manager
+from multiprocessing import Manager, Process
 
 import yaml
+from influxdb import InfluxDBClient
 from kombu import Connection, Consumer, Exchange, Queue
 
 
