@@ -1,13 +1,13 @@
 """This script is a producer that publishes condor status details to the queue"""
+
 import argparse
-import datetime
+import os
+import re
+import subprocess
 import sys
 import time
-import os
-import subprocess
 import yaml
-from kombu import Connection, Producer, Exchange, Queue
-
+from kombu import Connection, Exchange, Producer, Queue
 
 
 def get_amqp_url(pulsar_app_file: str) -> None:
@@ -48,11 +48,19 @@ def connect_to_queue(amqp_url: str) -> Connection:
         return None
 
 
+def process_condor_status_output(condor_status_output: str) -> str:
+    """
+    Replace empty/None values  with 0 in the condor status output
+    """
+    processed_output = re.sub(r'(\w+)=,', r'\1=0,', condor_status_output)
+    return processed_output
+
+
 def get_condor_status(cluster_status_script_file: str) -> str:
     """
     Get condor status from shell script output
     """
-    condor_metrics = subprocess.check_output(["sh", cluster_status_script_file]).decode("utf-8").strip()
+    condor_metrics = process_condor_status_output(subprocess.check_output(["sh", cluster_status_script_file]).decode("utf-8").strip())
 
     # Add timestamp
     now = time.time()
@@ -80,10 +88,10 @@ def produce_message(amqp_url: str, condor_metrics: str) -> None:
         condor_metrics = f"{condor_metrics},destinationd_id={vhost}"
 
         producer.publish(
-            {"condor_metrics": condor_metrics},  
-            exchange=exchange,   
-            routing_key=routing_key,    
-            declare=[queue],  
+            {"condor_metrics": condor_metrics},
+            exchange=exchange,
+            routing_key=routing_key,
+            declare=[queue],
             serializer="json"
         )
         connection.release()
