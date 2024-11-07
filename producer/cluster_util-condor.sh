@@ -2,7 +2,7 @@
 # Details: This script is used to monitor the entire HTCondor cluster usage independent of GalaxyGroup's
 
 # Total number of detected CPUs at the machine level
-total_detected_cpus=$(condor_status -af DetectedCpus -constraint 'SlotType == "Partitionable"' | paste -s -d'+' | bc)
+total_detected_cpus=$(condor_status -af Cpus | paste -s -d'+' | bc)
 
 # Claimed CPUs
 claimed_cpus=$(condor_status -af Cpus -constraint 'State == "Claimed"' | paste -s -d'+' | bc)
@@ -11,7 +11,7 @@ claimed_cpus=$(condor_status -af Cpus -constraint 'State == "Claimed"' | paste -
 unclaimed_cpus=$(condor_status -af Cpus -constraint 'State == "Unclaimed"' | paste -s -d'+' | bc)
 
 # Total memory at the machine level
-total_memory=$(condor_status -af TotalMemory -constraint 'SlotType == "Partitionable"' | paste -s -d'+' | bc)
+total_memory=$(condor_status -af Memory | paste -s -d'+' | bc)
 
 # Claimed memory
 claimed_memory=$(condor_status -af Memory -constraint 'State == "Claimed"' | paste -s -d'+' | bc)
@@ -29,7 +29,7 @@ claimed_gpus=$(condor_status -af Name -constraint 'State == "Claimed" && CUDADev
 unclaimed_gpus=$(condor_status -af Name -constraint 'State == "Unclaimed" && CUDADeviceName =!= undefined' | wc -l)
 
 # Total load average at the machine level
-total_loadavg=$(condor_status -af TotalLoadAvg -constraint 'SlotType == "Partitionable"' | paste -s -d'+' | bc)
+total_loadavg=$(condor_status -af LoadAvg | paste -s -d'+' | bc)
 
 # Claimed load average
 claimed_loadavg=$(condor_status -af LoadAvg -constraint 'State == "Claimed"' | paste -s -d'+' | bc)
@@ -38,7 +38,7 @@ claimed_loadavg=$(condor_status -af LoadAvg -constraint 'State == "Claimed"' | p
 unclaimed_loadavg=$(condor_status -af LoadAvg -constraint 'State == "Unclaimed"' | paste -s -d'+' | bc)
 
 # Total number of slots
-total_slots=$(condor_status -af Name -constraint 'SlotType == "Partitionable" || SlotType == "Dynamic" ' | wc -l)
+total_slots=$(condor_status -af Name | wc -l)
 
 # Total number of Claimed slots with Activity Busy
 claimed_busy_slots=$(condor_status -af Name -constraint 'State == "Claimed" && Activity == "Busy"' | wc -l)
